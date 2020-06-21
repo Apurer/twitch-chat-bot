@@ -7,7 +7,34 @@ import (
 	"github.com/Apurer/eev"
 	"github.com/Apurer/eev/privatekey"
 	"log"
+	"time"
+	"net/http"
+	"io/ioutil"
 )
+
+func GetFollowers(oauthToken string) {
+	for {
+		url := "https://api.twitch.tv/helix/users/follows?to_id=488014220"
+		fmt.Println("URL:>", url)
+	
+		req, err := http.NewRequest("GET", url, nil)
+		req.Header.Set("Client-ID", "r5lf6jgtrj9f7jxay85o4q4vz4v8xa")
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", oauthToken))
+	
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+	
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("response Body:", string(body))
+		time.Sleep(100 * time.Millisecond)
+	}
+}
 
 func Connect() {
 
@@ -24,6 +51,8 @@ func Connect() {
 	if err != nil {
 		panic(err)
 	}
+
+	go GetFollowers(oauthToken)
 
 	conf := &tls.Config{}
 	con, err := tls.Dial("tcp", "irc.chat.twitch.tv:6697", conf)
