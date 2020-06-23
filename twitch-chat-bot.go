@@ -9,6 +9,7 @@ import (
 	"time"
 	"flag"
 	"fmt"
+	"reflect"
 	"log"
 )
 
@@ -28,14 +29,16 @@ type Users struct {
 	Data []User
 }
 
+type Follower struct {
+	FollowedAt string `json:"followed_at"`
+	FromID     string `json:"from_id"`
+	FromName   string `json:"from_name"`
+	ToID       string `json:"to_id"`
+	ToName     string `json:"to_name"`
+}
+
 type Followers struct {
-	Data []struct {
-		FollowedAt string `json:"followed_at"`
-		FromID     string `json:"from_id"`
-		FromName   string `json:"from_name"`
-		ToID       string `json:"to_id"`
-		ToName     string `json:"to_name"`
-	} `json:"data"`
+	Data []Follower `json:"data"`
 	Pagination struct {
 		Cursor string `json:"cursor"`
 	} `json:"pagination"`
@@ -75,11 +78,33 @@ func GetFollowers(channel chan<- Followers, userID string, oauthToken string, cl
 	}
 }
 
-func PrintFollowers(channel chan Followers){
+func AppreciateFollowers(channel string, con *tls.Conn, c chan Followers){
+	var compare_followers []Follower
 	for {
 		select {
-        case followers := <-channel:
-            fmt.Println(followers)
+        case followers := <-c:
+			if len(compare_followers) > 0 {
+				var new_followers []string
+				
+				for _, follower := range followers.Data {
+					found := false
+					for _, compare_follower := range compare_followers {
+						if follower.FromID == compare_follower.FromID {
+							found = true
+							break
+						}
+					}
+					if found == false {
+						new_followers = append(new_followers, follower.FromName)
+					}
+				}
+
+				for _, username := range new_followers {
+					fmt.Fprintf(con, fmt.Sprintf("PRIVMSG #%s :Dziekuje za follow %s\r\n", channel, username)) 
+				}
+			}
+			compare_followers = make([]Follower, len(followers.Data))
+			copy(compare_followers, followers.Data)
 		}
 	}
 }
@@ -117,7 +142,7 @@ func GetUser(username string, oauthToken string, clientID string) User {
 	return users.Data[0]
 }
 
-func IRCchat(user string, oauthToken string, channel string) {
+func IRCchat(user string, oauthToken string, channel string, c chan Followers) {
 
 	conf := &tls.Config{}
 	con, err := tls.Dial("tcp", "irc.chat.twitch.tv:6697", conf)
@@ -126,12 +151,18 @@ func IRCchat(user string, oauthToken string, channel string) {
 		return
 	}
 
+	fmt.Println("type of con: ",reflect.TypeOf(*con).Kind())
+
+
 	fmt.Fprintf(con, fmt.Sprintf("PASS oauth:%s\r\n", oauthToken))
 
 	fmt.Fprintf(con, "CAP REQ :twitch.tv/tags\r\n")
 	fmt.Fprintf(con, fmt.Sprintf("NICK %s\r\n", user)) 
 	fmt.Fprintf(con, fmt.Sprintf("USER %s\r\n", user))
 	fmt.Fprintf(con, fmt.Sprintf("JOIN #%s\r\n", channel))
+
+	go AppreciateFollowers(channel, con, c)
+
 	var msg = make([]byte, 1024)
 	var b int
 	b, _ = con.Read(msg)
@@ -175,5 +206,5 @@ func main() {
 	userID := user.ID
 	go GetFollowers(c, userID, oauthToken, clientID)
 	go PrintFollowers(c)
-	IRCchat(username, oauthToken, channel)
+	IRCchat(username, oauthToken, channel, c)
 }
