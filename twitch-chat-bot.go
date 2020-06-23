@@ -1,20 +1,52 @@
 package main
 
 import (
+	"github.com/Apurer/eev/privatekey"
+	"github.com/Apurer/eev"
+	"encoding/json"
 	"crypto/tls"
+	"net/http"
+	"time"
 	"flag"
 	"fmt"
-	"github.com/Apurer/eev"
-	"github.com/Apurer/eev/privatekey"
 	"log"
-	"time"
-	"net/http"
-	"io/ioutil"
 )
 
-func GetFollowers(oauthToken string) {
+type User struct {
+	BroadcasterType string `json:"broadcaster_type"`
+	Description     string `json:"description"`
+	DisplayName     string `json:"display_name"`
+	ID              string `json:"id"`
+	Login           string `json:"login"`
+	OfflineImageURL string `json:"offline_image_url"`
+	ProfileImageURL string `json:"profile_image_url"`
+	Type            string `json:"type"`
+	ViewCount       int64  `json:"view_count"`
+}
 
-	url := "https://api.twitch.tv/helix/users/follows?to_id=488014220"
+type Users struct {
+	Data []User
+}
+
+type Followers struct {
+	Data []struct {
+		FollowedAt string `json:"followed_at"`
+		FromID     string `json:"from_id"`
+		FromName   string `json:"from_name"`
+		ToID       string `json:"to_id"`
+		ToName     string `json:"to_name"`
+	} `json:"data"`
+	Pagination struct {
+		Cursor string `json:"cursor"`
+	} `json:"pagination"`
+	Total int64 `json:"total"`
+}
+
+func GetFollowers(channel chan<- Followers, userID string, oauthToken string, clientID string) {
+
+	followers := new(Followers)
+
+	url := fmt.Sprintf("https://api.twitch.tv/helix/users/follows?to_id=%s", userID)
 	fmt.Println("URL:>", url)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -22,7 +54,7 @@ func GetFollowers(oauthToken string) {
 		panic(err)
 	}
 
-	req.Header.Set("Client-ID", "r5lf6jgtrj9f7jxay85o4q4vz4v8xa")
+	req.Header.Set("Client-ID", clientID)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", oauthToken))
 
 	client := &http.Client{}
@@ -33,16 +65,59 @@ func GetFollowers(oauthToken string) {
 			panic(err)
 		}
 		defer resp.Body.Close()
-	
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("response Body:", string(body))
+
+		err = json.NewDecoder(resp.Body).Decode(followers)
+		if err != nil {
+			panic(err)
+		}
+		channel <- *followers
 		time.Sleep(3 * time.Second)
 	}
 }
 
-func Connect(user string, oauthToken string, channel string) {
+func PrintFollowers(channel chan Followers){
+	for {
+		select {
+        case followers := <-channel:
+            fmt.Println(followers)
+		}
+	}
+}
+
+func GetUser(username string, oauthToken string, clientID string) User {
+	users := new(Users)
+	
+	url := fmt.Sprintf("https://api.twitch.tv/helix/users?login=%s", username)
+	fmt.Println("URL:>", url)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	req.Header.Set("Client-ID", clientID)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", oauthToken))
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(users)
+	if err != nil {
+		panic(err)
+	}
+
+	if e:=len(users.Data); e != 1 {
+		panic(fmt.Errorf("number: %d of elements returned by request regarding user: %s does not equal 1", e, username))
+	}
+
+	return users.Data[0]
+}
+
+func IRCchat(user string, oauthToken string, channel string) {
 
 	conf := &tls.Config{}
 	con, err := tls.Dial("tcp", "irc.chat.twitch.tv:6697", conf)
@@ -91,6 +166,14 @@ func main() {
 		panic(err)
 	}
 
-	go GetFollowers(oauthToken)
-	Connect("ApurerTV", oauthToken, "ApurerTV")
+	username := "apurertv"
+	channel := "apurertv"
+	clientID := "r5lf6jgtrj9f7jxay85o4q4vz4v8xa"
+	
+	c := make(chan Followers)
+	user := GetUser(username, oauthToken, clientID)
+	userID := user.ID
+	go GetFollowers(c, userID, oauthToken, clientID)
+	go PrintFollowers(c)
+	IRCchat(username, oauthToken, channel)
 }
