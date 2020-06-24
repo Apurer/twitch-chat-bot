@@ -9,7 +9,6 @@ import (
 	"time"
 	"flag"
 	"fmt"
-	"reflect"
 	"log"
 )
 
@@ -151,9 +150,6 @@ func IRCchat(user string, oauthToken string, channel string, c chan Followers) {
 		return
 	}
 
-	fmt.Println("type of con: ",reflect.TypeOf(*con).Kind())
-
-
 	fmt.Fprintf(con, fmt.Sprintf("PASS oauth:%s\r\n", oauthToken))
 
 	fmt.Fprintf(con, "CAP REQ :twitch.tv/tags\r\n")
@@ -205,6 +201,5 @@ func main() {
 	user := GetUser(username, oauthToken, clientID)
 	userID := user.ID
 	go GetFollowers(c, userID, oauthToken, clientID)
-	go PrintFollowers(c)
 	IRCchat(username, oauthToken, channel, c)
 }
