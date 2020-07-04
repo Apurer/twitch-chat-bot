@@ -1,9 +1,9 @@
 package main
 
 import (
-	. "github.com/Apurer/twitch-chat-bot/structs"
-	API "github.com/Apurer/twitch-chat-bot/api"
-	IRC "github.com/Apurer/twitch-chat-bot/irc"
+	. "github.com/Apurer/twitch/structs"
+	API "github.com/Apurer/twitch/api"
+	IRC "github.com/Apurer/twitch/irc"
 	"github.com/Apurer/eev/privatekey"
 	"github.com/Apurer/eev"
 	"flag"

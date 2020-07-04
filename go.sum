@@ -1,2 +1,4 @@
 github.com/Apurer/eev v0.0.0-20200608232516-674daf0a066a h1:BKSveMe4LI7OAu6UkZhWeV3Wp+LTOXg7mbFJyHZAQPI=
 github.com/Apurer/eev v0.0.0-20200608232516-674daf0a066a/go.mod h1:Q/VZ6I2j4CjnZi1Jddt+5P7Ukh+tzn2CDYWgF6Fb6Gw=
+github.com/Apurer/twitch v0.0.0-20200704133354-197023f16b8a h1:WJpxXS7rzRvq4fCLcxpg25bZ881ADbkZv+suhzZ5y+U=
+github.com/Apurer/twitch v0.0.0-20200704133354-197023f16b8a/go.mod h1:+qnlWvWwKRu0efSf8A0/mTa2J0XjyjnAN7lGyD7z8ss=
