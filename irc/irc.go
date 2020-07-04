@@ -8,32 +8,37 @@ import (
 )
 
 func AppreciateFollowers(channel string, con *tls.Conn, c chan Followers){
-	var compare_followers []Follower
+	var compare_followers []string
+	
 	for {
 		select {
         case followers := <-c:
 			if len(compare_followers) > 0 {
-				var new_followers []string
+				var new_followers []Follower
 				
 				for _, follower := range followers.Data {
 					found := false
 					for _, compare_follower := range compare_followers {
-						if follower.FromID == compare_follower.FromID {
+						if follower.FromID == compare_follower {
 							found = true
 							break
 						}
 					}
 					if found == false {
-						new_followers = append(new_followers, follower.FromName)
+						new_followers = append(new_followers, follower)
 					}
 				}
 
-				for _, username := range new_followers {
-					fmt.Fprintf(con, fmt.Sprintf("PRIVMSG #%s :Dziekuje za follow %s\r\n", channel, username)) 
+				for _, follower := range new_followers {
+					fmt.Fprintf(con, fmt.Sprintf("PRIVMSG #%s :Dziekuje za follow %s\r\n", channel, follower.FromName))
+					compare_followers = append(compare_followers, follower.FromID)
+				}
+				
+			} else {
+				for _, follower := range followers.Data {
+					compare_followers = append(compare_followers, follower.FromID)
 				}
 			}
-			compare_followers = make([]Follower, len(followers.Data))
-			copy(compare_followers, followers.Data)
 		}
 	}
 }
