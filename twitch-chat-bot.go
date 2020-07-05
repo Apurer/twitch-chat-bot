@@ -1,6 +1,8 @@
 package main
 
 import (
+	WebSocket "github.com/Apurer/twitch-chat-bot/server/websocket"
+	Server "github.com/Apurer/twitch-chat-bot/server"
 	. "github.com/Apurer/twitch/structs"
 	API "github.com/Apurer/twitch/api"
 	IRC "github.com/Apurer/twitch/irc"
@@ -8,6 +10,7 @@ import (
 	"github.com/Apurer/eev"
 	"flag"
 )
+
 
 func main() {
 
@@ -28,10 +31,15 @@ func main() {
 	username := "apurertv"
 	channel := "apurertv"
 	clientID := "r5lf6jgtrj9f7jxay85o4q4vz4v8xa"
-	
+
 	c := make(chan Followers)
+	r := make(chan string)
+	w := make(chan string)
+
 	user := API.GetUser(username, oauthToken, clientID)
 	userID := user.ID
 	go API.GetFollowers(c, userID, oauthToken, clientID)
-	IRC.Chat(username, oauthToken, channel, c)
+	var rw = WebSocket.IRC{Read: &r, Write: &w}
+	go IRC.Chat(username, oauthToken, channel, c, r, w)
+	Server.Host(rw)
 }
