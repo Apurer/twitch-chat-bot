@@ -1,6 +1,6 @@
 github.com/Apurer/eev v0.0.0-20200608232516-674daf0a066a h1:BKSveMe4LI7OAu6UkZhWeV3Wp+LTOXg7mbFJyHZAQPI=
 github.com/Apurer/eev v0.0.0-20200608232516-674daf0a066a/go.mod h1:Q/VZ6I2j4CjnZi1Jddt+5P7Ukh+tzn2CDYWgF6Fb6Gw=
-github.com/Apurer/twitch v0.0.0-20200705023910-6e9696a8e6c1 h1:ccQ8izY+7G2tQSKq17u35J0Z3tq57yGaJvIfd5Ar5+o=
-github.com/Apurer/twitch v0.0.0-20200705023910-6e9696a8e6c1/go.mod h1:+qnlWvWwKRu0efSf8A0/mTa2J0XjyjnAN7lGyD7z8ss=
+github.com/Apurer/twitch v0.0.0-20200705125328-bc446e527ec0 h1:M/ffv92L73nUIzDmErerKkctngKBqhNJhVcRx4qG960=
+github.com/Apurer/twitch v0.0.0-20200705125328-bc446e527ec0/go.mod h1:+qnlWvWwKRu0efSf8A0/mTa2J0XjyjnAN7lGyD7z8ss=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=

@@ -39,7 +39,7 @@ func main() {
 	user := API.GetUser(username, oauthToken, clientID)
 	userID := user.ID
 	go API.GetFollowers(c, userID, oauthToken, clientID)
-	var rw = WebSocket.IRC{Read: &r, Write: &w}
+	var rw = WebSocket.IRC{Read: r, Write: w}
 	go IRC.Chat(username, oauthToken, channel, c, r, w)
 	Server.Host(rw)
 }
