@@ -23,7 +23,7 @@ func main() {
 		panic(err)
 	}
 
-	oauthToken, err := eev.Get("OAUTH_TOKEN_TWITCH", privkey)
+	oauthToken, err := eev.Get("TWITCH_OAUTH_TOKEN", privkey)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func main() {
 	user := API.GetUser(username, oauthToken, clientID)
 	userID := user.ID
 	go API.GetFollowers(c, userID, oauthToken, clientID)
-	var rw = WebSocket.IRC{Read: r, Write: w}
+	var rw = WebSocket.IRC{Read: &r, Write: &w}
 	go IRC.Chat(username, oauthToken, channel, c, r, w)
 	Server.Host(rw)
 }

@@ -16,3 +16,4 @@ server/api
 # vendor/
 private-key
 .DS_Store
+twitch-chat-bot

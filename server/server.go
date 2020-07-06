@@ -3,6 +3,7 @@ package server
 import (
 	//WebSocket "github.com/Apurer/twitch-chat-bot/server/websocket"
 	. "github.com/Apurer/twitch-chat-bot/server/websocket"
+	. "github.com/Apurer/twitch-chat-bot/server/websocket/hub"
 	"log"
 	"flag"
 	"net/http"
@@ -14,6 +15,8 @@ var (
 )
 
 func Host(irc IRC) {
+	hub := NewHub()
+	go hub.Run()
 	fs := http.FileServer(http.Dir(*dir))
 	http.Handle("/", fs)
 	//http.HandleFunc("/irc", irc.RW)

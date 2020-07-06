@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/websocket"
+	. "github.com/Apurer/twitch-chat-bot/server/websocket/hub"
 )
 
 var upgrader = websocket.Upgrader{    
@@ -14,6 +15,21 @@ var upgrader = websocket.Upgrader{
 type IRC struct {
 	Read *chan string
 	Write *chan string
+}
+
+func RWWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	client := &Client{Hub: hub, Conn: conn, Send: make(chan []byte, 256)}
+	client.Hub.Register <- client
+
+	// Allow collection of memory referenced by the caller by doing all work in
+	// new goroutines.
+	go client.WritePump()
+	go client.ReadPump()
 }
 
 func (channel *IRC) RW(w http.ResponseWriter, r *http.Request){
