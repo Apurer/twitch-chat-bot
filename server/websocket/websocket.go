@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"log"
-	"sync"
 	"net/http"
 	"github.com/gorilla/websocket"
 )
@@ -13,8 +12,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type IRC struct {
-	Read chan string
-	Write chan string
+	Read *chan string
+	Write *chan string
 }
 
 func (channel *IRC) RW(w http.ResponseWriter, r *http.Request){
@@ -33,14 +32,14 @@ func (channel *IRC) RW(w http.ResponseWriter, r *http.Request){
 				break
 			}
 
-			go func() { channel.Write <- string(message) }()
+			go func() { *channel.Write <- string(message) }()
 			log.Printf("recv: %s", message)
 		}
 	}()
 
 	for {
 		select {
-		case read := <-channel.Read:
+		case read := <-*channel.Read:
 			err = c.WriteMessage(websocket.BinaryMessage, []byte(read))
 			log.Printf("write: %s", read)
 			if err != nil {
@@ -58,7 +57,7 @@ func Echo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer c.Close()
-	
+
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
