@@ -5,13 +5,10 @@
 package hub
 
 import (
-	//. "github.com/Apurer/twitch-chat-bot/server/websocket/client"
-	"bytes"
-	"log"
-	//"net/http"
-	"time"
-	//. "github.com/Apurer/twitch-chat-bot/server/websocket/hub"
 	"github.com/gorilla/websocket"
+	"bytes"
+	"time"
+	"log"
 )
 
 const (
@@ -71,7 +68,7 @@ func (c *Client) ReadPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.Hub.Broadcast <- message
+		c.Hub.IRC <- message
 	}
 }
 
@@ -127,6 +124,9 @@ type Hub struct {
 	// Registered clients.
 	Clients map[*Client]bool
 
+	// IRC chat messages 
+	IRC chan []byte
+
 	// Inbound messages from the clients.
 	Broadcast chan []byte
 
@@ -140,13 +140,14 @@ type Hub struct {
 func NewHub() *Hub {
 	return &Hub{
 		Broadcast:  make(chan []byte),
+		IRC:		make(chan []byte),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Clients:    make(map[*Client]bool),
 	}
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(irc chan []byte) {
 	for {
 		select {
 		case client := <-h.Register:
@@ -165,6 +166,17 @@ func (h *Hub) Run() {
 					delete(h.Clients, client)
 				}
 			}
+		case chat := <-h.IRC: 
+			 irc <- chat
+		}
+	}
+}
+
+func (h *Hub) Chat(channel chan []byte) {
+	for {
+		select {
+		case read := <-channel:
+			h.Broadcast <- read
 		}
 	}
 }

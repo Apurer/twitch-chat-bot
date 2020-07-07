@@ -1,12 +1,11 @@
 package server 
 
 import (
-	//WebSocket "github.com/Apurer/twitch-chat-bot/server/websocket"
-	. "github.com/Apurer/twitch-chat-bot/server/websocket"
 	. "github.com/Apurer/twitch-chat-bot/server/websocket/hub"
-	"log"
-	"flag"
+	. "github.com/Apurer/twitch-chat-bot/server/websocket"
 	"net/http"
+	"flag"
+	"log"
 )
 
 var (
@@ -16,12 +15,12 @@ var (
 
 func Host(irc IRC) {
 	hub := NewHub()
-	go hub.Run()
+	go hub.Run(*irc.Write)
+	go hub.Chat(*irc.Read)
 	fs := http.FileServer(http.Dir(*dir))
 	http.Handle("/", fs)
-	//http.HandleFunc("/irc", irc.RW)
 	http.HandleFunc("/irc", func(w http.ResponseWriter, r *http.Request) {
-		RWWs(hub, w, r)
+		irc.RW(hub, w, r)
 	})
 	http.HandleFunc("/echo", Echo)
 	err := http.ListenAndServeTLS(*listen, "server.rsa.crt", "server.rsa.key", nil)

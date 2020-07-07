@@ -33,8 +33,8 @@ func main() {
 	clientID := "r5lf6jgtrj9f7jxay85o4q4vz4v8xa"
 
 	c := make(chan Followers)
-	r := make(chan string)
-	w := make(chan string)
+	r := make(chan []byte)
+	w := make(chan []byte)
 
 	user := API.GetUser(username, oauthToken, clientID)
 	userID := user.ID
