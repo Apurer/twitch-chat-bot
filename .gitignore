@@ -17,3 +17,5 @@ server/api
 private-key
 .DS_Store
 twitch-chat-bot
+server.rsa.key
+server.rsa.crt
