@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	listen = flag.String("listen", ":443", "listen address")
+	listen = flag.String("listen", ":80", "listen address")
 	dir    = flag.String("dir", "./wwwroot", "directory to serve")
 )
 
@@ -23,7 +23,7 @@ func Host(irc IRC) {
 		irc.RW(hub, w, r)
 	})
 	http.HandleFunc("/echo", Echo)
-	err := http.ListenAndServeTLS(*listen, "server.rsa.crt", "server.rsa.key", nil)
+	err := http.ListenAndServe(*listen, nil)
     if err != nil {
         log.Fatal("ListenAndServe: ", err)
     }
