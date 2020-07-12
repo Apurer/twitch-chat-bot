@@ -30,10 +30,6 @@ func GetFollowers(channel chan<- Followers, userID string, oauthToken string, cl
 		if err != nil {
 			panic(err)
 		}
-
-		for k, v := range resp.Header {
-			fmt.Printf("Header field %q, Value %q\n", k, v)
-		}
 	
 		defer resp.Body.Close()
 
