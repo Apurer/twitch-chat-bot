@@ -3,9 +3,9 @@ package main
 import (
 	WebSocket "github.com/Apurer/twitch-chat-bot/server/websocket"
 	Server "github.com/Apurer/twitch-chat-bot/server"
-	. "github.com/Apurer/twitch/structs"
-	API "github.com/Apurer/twitch/api"
-	IRC "github.com/Apurer/twitch/irc"
+	. "github.com/Apurer/twitch-chat-bot/structs/twitch"
+	API "github.com/Apurer/twitch-chat-bot/api"
+	IRC "github.com/Apurer/twitch-chat-bot/irc"
 	"github.com/Apurer/eev/privatekey"
 	"github.com/Apurer/eev"
 	"flag"
